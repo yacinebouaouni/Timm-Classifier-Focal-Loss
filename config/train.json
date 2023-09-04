@@ -1,0 +1,39 @@
+{
+    "data": {
+        "name": "train_dataset",
+        "n_channels": 1,
+        "dataroot": {
+            "train": "train_data.csv",
+            "validation": "eval_data.csv",
+            "csv": "/home/ybouaouni/shared/ybouaouni/AI_ISG3/Sanctions_all.csv",
+            "root": "/home/ybouaouni/shared/ybouaouni"
+        },
+        "scope": {
+            "2021": [
+                "12"
+            ],
+            "2022": [
+                "6",
+                "7",
+                "8"
+            ]
+        },
+        "DIE": "Die02",
+        "program": "SBL-SW-73020",
+        "encoding": {
+            "BAD": 0,
+            "GOOD": 1
+        },
+        "size": 224,
+        "dataloader_shuffle": true
+    ,
+        "dataloader_num_workers": 4,
+        "dataloader_batch_size": 64
+    },
+    "loss": {
+        "loss_type": "focal",
+        "gamma": 2,
+        "alpha": 0.5,
+        "reduction": "sum"
+    }
+}

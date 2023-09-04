@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 class Classifier(nn.Module):
-    def __init__(self, model_name, num_classes=2):
+    def __init__(self, model_name, num_classes=1):
         super(Classifier, self).__init__()
 
         # Load the specified model from timm and ensure it's not pretrained
@@ -17,6 +17,10 @@ class Classifier(nn.Module):
         setattr(model, "fc", nn.Linear(num_ftrs, num_classes))
 
         self.model = model
+        if num_classes == 1:
+            self.activation = nn.Sigmoid()
+        else:
+            self.activation = nn.Softmax()
 
     def forward(self, x):
-        return self.model(x)
+        return self.activation(self.model(x))

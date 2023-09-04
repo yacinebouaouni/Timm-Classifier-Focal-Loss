@@ -20,17 +20,17 @@ class DatasetBinary(data.Dataset):
     Train: YYYY MM DD
     '''
 
-    def __init__(self, config):
+    def __init__(self, config, tag):
         super(DatasetBinary, self).__init__()
         self.config = config
         self.n_channels = self.config['n_channels'] if self.config['n_channels'] else 1
         self.img_size = self.config['size'] if self.config['size'] else 512
-        self.path_csv = self.config['dataroot']['csv']
+        self.path_csv = self.config['dataroot'][tag]
         self.root = self.config['dataroot']['root']
         # ------------------------------------
         # get the path of the images
         # ------------------------------------
-        df = self.filter_df()
+        df = pd.read_csv(self.path_csv)
         self.paths = list(df['path'].values)
         self.labels = list(df['Sanction'].values)
 
@@ -55,16 +55,4 @@ class DatasetBinary(data.Dataset):
         img = uint2tensor3(img) #tensor CxHxW 0-1
         return img
 
-    def filter_df(self):
-
-        df = pd.read_csv(self.config['dataroot']['csv'])
-        df = df.loc[df.lib == self.config['DIE']]
-        df = df.loc[df.program == self.config['program']]
-        dfs = []
-        for year in list(self.config['scope'].keys()):
-            for month in self.config['scope'][year]:
-                dfs.append(df.loc[(df.year == int(year)) & (df.month == int(month))])
-        dfs = pd.concat(dfs)
-        return dfs.reset_index()
-
-        
+  

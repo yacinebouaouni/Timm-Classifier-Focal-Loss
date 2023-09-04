@@ -4,6 +4,7 @@ from loss.loss import select_loss
 import torch.optim as optim
 import torch
 import json
+from sklearn.metrics import accuracy_score, f1_score
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -58,17 +59,24 @@ for epoch in range(N):
     # Validation loop
     m.eval()  # Set the model to evaluation mode
     validation_loss = 0.0
-
+    predictions = []
+    ground_truths = []
     with torch.no_grad():
         for data in validation_loader:
             output = m(data['img'].to(device))
             loss = l(output.squeeze(), data['label'].to(device))
             validation_loss += loss.item()
+            # Convert the model's output to binary predictions (e.g., 0 or 1)
+            predictions.extend((output > 0.5).cpu().numpy().tolist())
+            ground_truths.extend(data['label'].cpu().numpy().tolist())
 
     # Calculate and print average validation loss for the epoch (if validation data is available)
     if validation_loader:
         average_validation_loss = validation_loss / len(validation_loader)
-        print(f"Epoch {epoch}/{N-1}, Train Loss : {average_loss:.4f}, Validation Loss: {average_validation_loss:.4f}")
+        # Calculate accuracy and F1 score
+        accuracy = accuracy_score(ground_truths, predictions)
+        f1 = f1_score(ground_truths, predictions)
+        print(f"Epoch {epoch}/{N-1}, Train Loss : {average_loss:.4f}, Validation Loss: {average_validation_loss:.4f}, Validation f1 = {f1:.2f}")
 
 # Training is complete
 print("Training complete.")

@@ -5,7 +5,22 @@ import torch.optim as optim
 import torch
 import json
 from sklearn.metrics import accuracy_score, f1_score
+from torch.utils.data import DataLoader
+from tqdm import tqdm  
+import random
+import numpy as np
 
+
+# Set random seeds for PyTorch, random, and numpy
+seed = 42
+torch.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)
+random.seed(seed)
+np.random.seed(seed)
+
+# Set determinism for cudnn (GPU operations)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 with open('config/train.json', 'r') as config_file:
@@ -18,8 +33,7 @@ d = DatasetBinary(config)
 l = select_loss(config_loss).to(device)
 optimizer = optim.Adam(m.parameters(), lr=0.001)
 
-from torch.utils.data import DataLoader
-from tqdm import tqdm  # Import tqdm.notebook for Jupyter compatibility
+
 
 train_loader = DataLoader(d, batch_size=32, shuffle=True, drop_last=True, num_workers=4)
 validation_loader = DataLoader(d, batch_size=32, shuffle=True, num_workers=4)

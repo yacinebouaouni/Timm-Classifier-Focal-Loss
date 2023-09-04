@@ -9,6 +9,9 @@ class Classifier(nn.Module):
         # Load the specified model from timm and ensure it's not pretrained
         model = timm.create_model(model_name, pretrained=False)
 
+        # The input images are grayscale 1 channel
+        model.conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
+
         # Modify the final classification layer for binary classification
         num_ftrs = model.fc.in_features if hasattr(model, "fc") else model.num_features
         setattr(model, "fc", nn.Linear(num_ftrs, num_classes))

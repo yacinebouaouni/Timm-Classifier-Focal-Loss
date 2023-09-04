@@ -13,7 +13,7 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 import argparse
 from helpers import split_data
-
+import os
 
 def main(json_path='config/train.json'):
 
@@ -21,6 +21,14 @@ def main(json_path='config/train.json'):
     parser.add_argument('--config', type=str, default=json_path, help='Path to option JSON file.')
     parser.add_argument('--experiment', type=str, required=True, help="name of experiment")
     args = parser.parse_args()
+
+    if not os.path.exists("logs"):
+        os.makedirs(os.path.join('logs', args.experiment, "models"))
+    elif args.experiment in os.listdir('logs'):
+        raise FileExistsError(f"The folder '{args.experiment}' already exists. Please specify a different folder name.")
+    else:
+        os.makedirs(os.path.join('logs', args.experiment, "models"))
+    
 
     # Set random seeds for PyTorch, random, and numpy
     seed = 42
@@ -50,12 +58,9 @@ def main(json_path='config/train.json'):
     optimizer = optim.Adam(m.parameters(), lr=0.0001)
 
 
-    train_loader = DataLoader(dataset_train, batch_size=32, shuffle=True,
-                            drop_last=True, num_workers=4)
-    validation_loader = DataLoader(dataset_eval, batch_size=32, shuffle=True, num_workers=4)
-
-    print(len(dataset_train))
-    print(len(dataset_eval))
+    train_loader = DataLoader(dataset_train, batch_size=64, shuffle=True,
+                            drop_last=True, num_workers=8)
+    validation_loader = DataLoader(dataset_eval, batch_size=64, shuffle=True, num_workers=8)
 
     # Number of training epochs
     N = 3
@@ -113,6 +118,8 @@ def main(json_path='config/train.json'):
             writer.add_scalar("Accuracy", accuracy, epoch)
             writer.add_scalar("F1 Score", f1, epoch)
             print(f"Epoch {epoch}/{N-1}, Train Loss : {average_loss:.4f}, Validation Loss: {average_validation_loss:.4f}, Validation f1 = {f1:.2f}")
+
+            torch.save(m.state_dict(), os.path.join("logs", args.experiment, "models", "model_"+str(epoch)+".pth"))
 
 
     # Training is complete

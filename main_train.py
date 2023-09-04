@@ -1,15 +1,16 @@
-from dataset import DatasetBinary
-from model import Classifier
-from loss.loss import select_loss
-import torch.optim as optim
-import torch
 import json
+import random
+
+import numpy as np
+import torch
+import torch.optim as optim
+from dataset import DatasetBinary
+from loss.loss import select_loss
+from model import Classifier
 from sklearn.metrics import accuracy_score, f1_score
 from torch.utils.data import DataLoader
-from tqdm import tqdm  
-import random
-import numpy as np
-
+from torch.utils.tensorboard import SummaryWriter
+from tqdm import tqdm
 
 # Set random seeds for PyTorch, random, and numpy
 seed = 42
@@ -28,20 +29,21 @@ with open('config/train.json', 'r') as config_file:
 
 config_loss = config['loss']
 config = config['data']
+# Create a TensorBoard writer
+writer = SummaryWriter(log_dir="./runs"+experiment)
 m = Classifier("resnet50", 1).to(device)
 d = DatasetBinary(config)
 l = select_loss(config_loss).to(device)
 optimizer = optim.Adam(m.parameters(), lr=0.001)
 
 
-
-train_loader = DataLoader(d, batch_size=32, shuffle=True, drop_last=True, num_workers=4)
+train_loader = DataLoader(d, batch_size=32, shuffle=True,
+                          drop_last=True, num_workers=4)
 validation_loader = DataLoader(d, batch_size=32, shuffle=True, num_workers=4)
 
 
-
 # Number of training epochs
-N = 10
+N = 3
 
 for epoch in range(N):
 
@@ -68,7 +70,8 @@ for epoch in range(N):
 
     # Calculate and print average training loss for the epoch
     average_loss = total_loss / len(train_loader)
-
+    # Log training loss to TensorBoard
+    writer.add_scalar("Loss/Training", average_loss, epoch)
 
     # Validation loop
     m.eval()  # Set the model to evaluation mode
@@ -90,10 +93,13 @@ for epoch in range(N):
         # Calculate accuracy and F1 score
         accuracy = accuracy_score(ground_truths, predictions)
         f1 = f1_score(ground_truths, predictions)
+        # Log validation loss, accuracy, and F1 score to TensorBoard
+        writer.add_scalar("Loss/Validation", average_validation_loss, epoch)
+        writer.add_scalar("Accuracy", accuracy, epoch)
+        writer.add_scalar("F1 Score", f1, epoch)
         print(f"Epoch {epoch}/{N-1}, Train Loss : {average_loss:.4f}, Validation Loss: {average_validation_loss:.4f}, Validation f1 = {f1:.2f}")
 
+
 # Training is complete
+writer.close()
 print("Training complete.")
-
-
-

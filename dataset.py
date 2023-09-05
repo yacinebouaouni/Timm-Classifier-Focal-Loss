@@ -24,7 +24,7 @@ class DatasetBinary(data.Dataset):
         super(DatasetBinary, self).__init__()
         self.config = config
         self.n_channels = self.config['n_channels'] if self.config['n_channels'] else 1
-        self.img_size = self.config['size'] if self.config['size'] else 512
+        self.img_size = self.config['size'] if self.config['size'] else 224
         self.path_csv = self.config['dataroot'][tag]
         self.root = self.config['dataroot']['root']
         # ------------------------------------

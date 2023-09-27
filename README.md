@@ -19,8 +19,7 @@ Follow these steps to get started with training and testing classifiers:
 1. Clone the repository to your local machine:
 
    ```bash
-   git clone https://github.com/your_username/your_repository.git
-  ``
+   git clone https://github.com/yacinebouaouni/Timm-Classifier-Focal-Loss.git
 
 ## Configuration
 The config.yaml file serves as the central configuration hub for your experiments. You can adjust various settings, including:
